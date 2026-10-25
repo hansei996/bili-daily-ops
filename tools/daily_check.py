@@ -87,6 +87,28 @@ def in_week(run, start, end):
     return start <= (run["date"] or "") <= end and run["metrics"] is not None
 
 
+def longest_gap(dates, start, end):
+    """在 [start, end] 这个窗口内，连续多少天没有记录。
+
+    只在被检查的窗口里算 —— 拿窗口外的空白当断更是错的。
+    """
+    from datetime import date, timedelta
+
+    have = {d for d in dates if d}
+    first = date.fromisoformat(start)
+    last = date.fromisoformat(end)
+    worst = current = 0
+    cursor = first
+    while cursor <= last:
+        if cursor.isoformat() in have:
+            current = 0
+        else:
+            current += 1
+            worst = max(worst, current)
+        cursor += timedelta(days=1)
+    return worst
+
+
 def build_table(runs, outside=None, metric="completion"):
     rows = []
     values = [cc.ratio(r["metrics"]) for r in runs]
@@ -128,7 +150,7 @@ def render(rows, metric="completion"):
     return chr(10).join(out)
 
 
-def check_asserts(runs, asserts, rows, outside=None, metric="completion"):
+def check_asserts(runs, asserts, rows, outside=None, metric="completion", window=("", "")):
     """返回 [(断言, 是否通过, 说明)]。"""
     results = []
     n = len(runs)
@@ -164,6 +186,14 @@ def check_asserts(runs, asserts, rows, outside=None, metric="completion"):
             titles = [r["title"] for r in runs if r["title"]]
             dupes = sorted({t for t in titles if titles.count(t) > 1})
             results.append((text, not dupes, "标题不重复" if not dupes else "重复：" + "、".join(dupes)))
+        elif text.startswith("gaps:"):
+            try:
+                limit = int(text.split(":", 1)[1])
+            except ValueError:
+                raise SystemExit(2)
+            worst = longest_gap([r["date"] for r in runs], window[0], window[1])
+            results.append((text, worst < limit,
+                            "最长连续 %d 天没记录（阈值：连续 %d 天算断更）" % (worst, limit)))
         elif text.startswith("cohort:"):
             probe = text.split(":", 1)[1]
             use = metric if probe in ("completion", "interaction", "ctr") else metric
@@ -196,14 +226,17 @@ def main(argv):
     metric = argv[argv.index("--metric") + 1] if "--metric" in argv else "completion"
     runs = [r for r in everything if in_week(r, start, end)]
     outside = [r for r in everything if not in_week(r, start, end)]
+    worst_gap = longest_gap([r["date"] for r in runs], start, end)
     rows = build_table(runs, outside, metric=metric)
     print(render(rows, metric))
+    print()
+    print("连续未记录：最长 %d 天（窗口 %s..%s）" % (worst_gap, start, end))
     print()
     if not asserts:
         print("没有断言可跑（退出码 0 只代表输入合法，不代表这周没问题）")
         return 0
 
-    results = check_asserts(runs, asserts, rows, outside, metric=metric)
+    results = check_asserts(runs, asserts, rows, outside, metric=metric, window=(start, end))
     for text, ok, detail in results:
         print("%s  %-24s %s" % ("PASS" if ok else "FAIL", text, detail))
     print()
