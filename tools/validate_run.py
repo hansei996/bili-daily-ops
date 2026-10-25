@@ -24,7 +24,8 @@ REQUIRED = {
     "title.pick": ("candidates", "chosen", "reason"),
     "cover.pick": ("candidates", "chosen", "reason"),
     "publish": ("bvid", "at"),
-    "metrics": ("at_hours", "views", "avg_view_sec", "duration_sec"),
+    # avg_view_sec 是可选的：公开接口不给「平均播放时长」，缺了不许猜，只是算不了完播率
+    "metrics": ("at_hours", "views", "duration_sec"),
     "review": ("verdict", "vs", "reason"),
 }
 
@@ -80,10 +81,10 @@ def check(events):
         if etype == "metrics":
             views = event.get("views")
             duration = event.get("duration_sec") or 0
-            avg = event.get("avg_view_sec") or 0
+            avg = event.get("avg_view_sec")
             if isinstance(views, (int, float)) and views < 0:
                 bad("V3", lineno, "views 不能是负数")
-            if duration > 0 and avg > duration * 1.02:
+            if avg is not None and duration > 0 and avg > duration * 1.02:
                 bad("V3", lineno, "avg_view_sec(%.1f) 超过 duration_sec(%.1f)：口径错了（是不是填了总观看时长？）" % (avg, duration))
             for name in RATIO_FIELDS:
                 if name in event:
