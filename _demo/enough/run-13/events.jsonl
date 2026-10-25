@@ -1,0 +1,3 @@
+{"type": "topic.pick", "at": "2026-10-01T20:00:00+08:00", "cohort": "tutorial", "options": [{"title": "a"}, {"title": "b"}], "chosen": 0}
+{"type": "publish", "at": "2026-10-01T20:30:00+08:00", "bvid": "BV13"}
+{"type": "metrics", "at_hours": 24, "views": 1013, "ctr": 0.05, "avg_view_sec": 90.92523538340998, "duration_sec": 200, "likes": 50}
