@@ -1,0 +1,3 @@
+{"type": "topic.pick", "at": "2026-10-20T20:00:00+08:00", "cohort": "tutorial", "options": [{"title": "标题 2", "who": "新手", "wrong_now": "乱问", "can_do_after": "改法", "minutes_to_material": 20, "metric": "completion", "metric_baseline": 0.4, "weak_in_existing": "只讲技巧", "counter_intuitive": ["越详细越差"]}, {"title": "备选", "who": "x", "wrong_now": "y", "can_do_after": "z"}], "chosen": 0}
+{"type": "publish", "at": "2026-10-20T20:30:00+08:00", "bvid": "BV20"}
+{"type": "metrics", "at_hours": 24, "views": 1210, "ctr": 0.051000000000000004, "avg_view_sec": 92.0, "duration_sec": 200, "likes": 60}

@@ -94,8 +94,14 @@ def collect(root, cohort=None):
     return rows
 
 
-def judge(rows, metric="completion", window=7, target_drop=0.30):
-    """返回 (判定, 说明行列表, 最小可判定退步)。判定只允许三种。"""
+def judge(rows, metric="completion", window=7, target_drop=0.30, baseline=None):
+    """返回 (判定, 说明行列表, 最小可判定退步)。
+
+    两种模式，区别是「基线从哪来」：
+      * 有窗口外基线（推荐）：拿基线中位数当参照，用窗口内的实际离散度算 MDE，
+        这样即使窗口只有 7 条，也能判出 2 倍的崩塌（这才是 cohort 配对的用意）。
+      * 没有基线：只能按「n 条全过能排除多少」来算，n 不够就是不可判定 —— 绝不说没退步。
+    """
     values = [r[metric] for r in rows if r.get(metric) is not None]
     n = len(values)
     tail = values[-window:]
@@ -104,30 +110,51 @@ def judge(rows, metric="completion", window=7, target_drop=0.30):
     if n == 0:
         return "不可判定", ["没有可用的运行记录"], float("inf")
 
-    mde = min_detectable(n)
-    need = n_needed(target_drop)
-    median = statistics.median(values)
-    lines.append("样本：%d 条（窗口内 %d 条）· 指标 %s · cohort 中位数 %.3f" % (n, len(tail), metric, median))
+    baseline_values = [r[metric] for r in (baseline or []) if r.get(metric) is not None]
 
-    if n < need:
-        lines.append(
-            "要看得出 %.0f%% 的退步需要 %d 条，现在只有 %d 条 —— 样本不足时不判「无退步」。"
-            % (target_drop * 100, math.ceil(need), n)
-        )
-        return "不可判定", lines, mde
-
-    if len(tail) >= 3:
-        below = [v for v in tail if v < median * (1 - target_drop / 2)]
-        consecutive = 0
-        worst = 0
+    if baseline_values:
+        median = statistics.median(baseline_values)
+        logs = [math.log(v / median) for v in values if v > 0 and median > 0]
+        sigma = statistics.pstdev(logs) if len(logs) > 1 else SIGMA_LOG
+        sigma = max(sigma, 0.05)
+        mde = (ALPHA_Z + POWER_Z) * sigma / math.sqrt(max(len(logs), 1))
+        lines.append("样本：窗口 %d 条 · 指标 %s · 基线 %d 条中位数 %.3f · 离散度 sigma=%.2f"
+                     % (n, metric, len(baseline_values), median, sigma))
+        need = max(2, math.ceil(n_needed(mde * 1.5, sigma)))
+        if n < need:
+            lines.append("窗口 %d 条少于判定所需 %d 条 —— 样本不足时不判「无退步」" % (n, need))
+            return "不可判定", lines, mde
+        threshold = median * (1 - target_drop / 2)
+        worst = consecutive = 0
         for value in tail:
-            consecutive = consecutive + 1 if value < median * (1 - target_drop / 2) else 0
+            consecutive = consecutive + 1 if value < threshold else 0
             worst = max(worst, consecutive)
         if worst >= 3:
-            lines.append("连续 %d 条明显低于 cohort 中位数（预注册阈值：连续 3 条）" % worst)
+            lines.append("连续 %d 条低于基线中位数的 %.0f%% 阈值（%.3f）"
+                         % (worst, (1 - target_drop / 2) * 100, threshold))
             return "退步", lines, mde
-        lines.append("没有连续 3 条低于预注册阈值（当前最长连续 %d 条）" % worst)
+        lines.append("没有连续 3 条低于阈值（当前最长 %d 条）" % worst)
+        return "没有可判定的退步", lines, mde
 
+    mde = min_detectable(n)
+    need = n_needed(target_drop)
+    lines.append("样本：%d 条（窗口内 %d 条）· 指标 %s · 无窗口外基线，用窗口内中位数 %.3f"
+                 % (n, len(tail), metric, statistics.median(values)))
+    if n < need:
+        lines.append("样本不足：要看得出 %.0f%% 的退步需要 %d 条，现在只有 %d 条 —— 不判「无退步」。"
+                     % (target_drop * 100, math.ceil(need), n))
+        return "不可判定", lines, mde
+
+    median = statistics.median(values)
+    threshold = median * (1 - target_drop / 2)
+    worst = consecutive = 0
+    for value in tail:
+        consecutive = consecutive + 1 if value < threshold else 0
+        worst = max(worst, consecutive)
+    if worst >= 3:
+        lines.append("连续 %d 条低于中位数的 %.0f%% 阈值（%.3f）" % (worst, (1 - target_drop / 2) * 100, threshold))
+        return "退步", lines, mde
+    lines.append("没有连续 3 条低于阈值（当前最长 %d 条）" % worst)
     return "没有可判定的退步", lines, mde
 
 
