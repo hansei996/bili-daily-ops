@@ -1,5 +1,36 @@
 # 变更记录
 
+## 2026-10-25 · F7 用真实榜单数据当同题材基线
+
+发现一个洞：我们唯一的**真实数据源**（公开接口）给不出完播率所需的平均播放时长，
+而完播率恰好是我先前默认的主指标 —— 等于主指标在真实数据上永远是 `-`。补救：换成**比值型指标 `interaction`**
+（点赞+币+收藏+评论+分享）/ 播放。这是接口真能给的。
+
+**新工具** `tools/seed_from_ranking.py`：从 `ranking/v2` 拉真实榜单，落成基线记录。
+工具自己在输出里提醒：这是**别人的视频**的累计值，只能比比值型指标，不能比绝对播放量。
+
+**daily_check 支持 `--metric`**：周表的指标列可在 completion / interaction / ctr 之间切换。
+
+**真实数据实测**（2026-10-25 抓取，15 条真实榜单视频）：
+
+```
+$ python tools/seed_from_ranking.py --top 15 --cohort real-ranking --out _baseline-real
+已写入 15 条真实基线到 _baseline-real（cohort=real-ranking，抓取时刻 2026-10-25T19:48:20+08:00）
+提醒：这是别人的视频的累计值，只能比比值型指标，不能比绝对播放量。
+
+$ python tools/validate_run.py _baseline-real
+结果：15 份记录全部通过
+
+$ python tools/cohort_check.py _baseline-real --cohort real-ranking --metric interaction
+  样本不足：要看得出 30% 的退步需要 35 条，现在只有 15 条 —— 不判「无退步」。
+判定：不可判定
+本窗口可判定的最小退步：45%（n=15, sigma=0.5, alpha=0.05 单侧, power=0.80）
+```
+
+**这次实测最有价值的地方**：15 条真实数据跑出来的是「不可判定」而不是一个漂亮结论 —— 这正是设计意图。
+
+测试：33 passed。
+
 ## 2026-10-25 · F6 把「记录」做便宜（针对 D2 第一条关停条件）
 
 D2 写的第一条关停条件是「4 周内没人用它记录满 7 天 → 记录这个动作太重」。

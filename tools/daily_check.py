@@ -25,7 +25,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cohort_check as cc  # noqa: E402
 import topic_gate  # noqa: E402
 
-COLUMNS = ("日期", "准入", "发布", "完播", "CTR", "cohort", "判定")
+BASE_COLUMNS = ("日期", "准入", "发布", "CTR", "cohort", "判定")
+METRIC_LABEL = {"completion": "完播", "interaction": "互动", "ctr": "CTR"}
 
 
 def _force_utf8():
@@ -80,28 +81,28 @@ def in_week(run, start, end):
     return start <= (run["date"] or "") <= end and run["metrics"] is not None
 
 
-def build_table(runs, outside=None):
+def build_table(runs, outside=None, metric="completion"):
     rows = []
     values = [cc.ratio(r["metrics"]) for r in runs]
     ref = [cc.ratio(r["metrics"]) for r in (outside or [])]
-    pool = [v["completion"] for v in ref if v and v.get("completion")]
+    pool = [v[metric] for v in ref if v and v.get(metric) is not None]
     if not pool:
-        pool = [v["completion"] for v in values if v and v.get("completion")]
+        pool = [v[metric] for v in values if v and v.get(metric) is not None]
     median = sorted(pool)[len(pool) // 2] if pool else None
     for run, value in zip(runs, values):
-        completion = value["completion"] if value else None
-        ctr = value["ctr"] if value else None
+        point = value.get(metric) if value else None
+        ctr = value.get("ctr") if value else None
         gate = run["gate"] or {}
         passed = 0
         for rule in ("who", "wrong_now", "can_do_after"):
             if (gate.get("options") or [{}])[0].get(rule) or gate.get(rule):
                 passed += 1
-        mark = "OK" if median is None or completion is None else ("低" if completion < median * 0.85 else "OK")
+        mark = "OK" if (median is None or point is None) else ("低" if point < median * 0.85 else "OK")
         rows.append({
             "日期": run["date"],
             "准入": "%d/3" % passed,
             "发布": "有",
-            "完播": "-" if completion is None else "%.0f%%" % (completion * 100),
+            "指标": "-" if point is None else "%.1f%%" % (point * 100),
             "CTR": "-" if ctr is None else "%.1f%%" % (ctr * 100),
             "cohort": mark,
             "判定": run["run"],
@@ -109,17 +110,19 @@ def build_table(runs, outside=None):
     return rows
 
 
-def render(rows):
-    widths = [max(len(COLUMNS[i]), *(len(str(r[COLUMNS[i]])) for r in rows)) if rows else len(COLUMNS[i]) for i in range(len(COLUMNS))]
+def render(rows, metric="completion"):
+    columns = ("日期", "准入", "发布", METRIC_LABEL.get(metric, metric), "CTR", "cohort", "判定")
+    keys = ["日期", "准入", "发布", "指标", "CTR", "cohort", "判定"]
+    widths = [max(len(columns[i]), *(len(str(r[keys[i]])) for r in rows)) if rows else len(columns[i]) for i in range(len(columns))]
     def line(cells):
         return "  ".join(str(c).ljust(widths[i]) for i, c in enumerate(cells))
-    out = [line(COLUMNS), line(["-" * w for w in widths])]
+    out = [line(columns), line(["-" * w for w in widths])]
     for row in rows:
-        out.append(line([row[c] for c in COLUMNS]))
+        out.append(line([row[keys[i]] for i in range(len(columns))]))
     return chr(10).join(out)
 
 
-def check_asserts(runs, asserts, rows, outside=None):
+def check_asserts(runs, asserts, rows, outside=None, metric="completion"):
     """返回 [(断言, 是否通过, 说明)]。"""
     results = []
     n = len(runs)
@@ -155,10 +158,12 @@ def check_asserts(runs, asserts, rows, outside=None):
             titles = [r["title"] for r in runs if r["title"]]
             dupes = sorted({t for t in titles if titles.count(t) > 1})
             results.append((text, not dupes, "标题不重复" if not dupes else "重复：" + "、".join(dupes)))
-        elif text == "cohort:completion":
+        elif text.startswith("cohort:"):
+            probe = text.split(":", 1)[1]
+            use = metric if probe in ("completion", "interaction", "ctr") else metric
             window_rows = [{"run": r["run"], **cc.ratio(r["metrics"])} for r in runs]
             base_rows = [{"run": r["run"], **cc.ratio(r["metrics"])} for r in (outside or [])]
-            verdict, notes, mde = cc.judge(window_rows, baseline=base_rows)
+            verdict, notes, mde = cc.judge(window_rows, metric=use, baseline=base_rows)
             ok = verdict != "退步"
             detail = "%s（本窗口可判定最小退步 %.0f%%）" % (verdict, mde * 100 if mde != float("inf") else 100)
             results.append((text, ok, detail))
@@ -182,16 +187,17 @@ def main(argv):
         return 2
 
     everything = load_runs(root)
+    metric = argv[argv.index("--metric") + 1] if "--metric" in argv else "completion"
     runs = [r for r in everything if in_week(r, start, end)]
     outside = [r for r in everything if not in_week(r, start, end)]
-    rows = build_table(runs, outside)
-    print(render(rows))
+    rows = build_table(runs, outside, metric=metric)
+    print(render(rows, metric))
     print()
     if not asserts:
         print("没有断言可跑（退出码 0 只代表输入合法，不代表这周没问题）")
         return 0
 
-    results = check_asserts(runs, asserts, rows, outside)
+    results = check_asserts(runs, asserts, rows, outside, metric=metric)
     for text, ok, detail in results:
         print("%s  %-24s %s" % ("PASS" if ok else "FAIL", text, detail))
     print()

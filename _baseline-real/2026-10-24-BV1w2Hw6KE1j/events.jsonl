@@ -1,0 +1,3 @@
+{"type": "topic.pick", "at": "2026-10-25T19:48:20+08:00", "cohort": "real-ranking", "options": [{"title": "写了全国所有省份的love me！"}, {"title": "（基线样本，无备选）"}], "chosen": 0, "why_only_one": "这是别人的视频，用来当同题材基线，不是我们的选题过程"}
+{"type": "publish", "at": "2026-10-24T12:11:37+08:00", "bvid": "BV1w2Hw6KE1j"}
+{"type": "metrics", "at": "2026-10-25T19:48:20+08:00", "snapshot_at": "2026-10-25T19:48:20+08:00", "at_hours": 72, "hours_since_publish": null, "views": 3857831, "likes": 405117, "coins": 43676, "favorites": 147912, "replies": 6817, "shares": 7072, "danmaku": 16432, "duration_sec": 108, "source": "bilibili.web-interface.ranking"}

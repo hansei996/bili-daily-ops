@@ -1,0 +1,3 @@
+{"type": "topic.pick", "at": "2026-10-25T19:48:20+08:00", "cohort": "real-ranking", "options": [{"title": "人性、欲望与奇观，自驾拉斯维加斯，现实夜之城什么样？"}, {"title": "（基线样本，无备选）"}], "chosen": 0, "why_only_one": "这是别人的视频，用来当同题材基线，不是我们的选题过程"}
+{"type": "publish", "at": "2026-10-23T20:42:08+08:00", "bvid": "BV12qnt6VEM1"}
+{"type": "metrics", "at": "2026-10-25T19:48:20+08:00", "snapshot_at": "2026-10-25T19:48:20+08:00", "at_hours": 72, "hours_since_publish": null, "views": 3963303, "likes": 160089, "coins": 56717, "favorites": 44163, "replies": 3625, "shares": 4825, "danmaku": 5866, "duration_sec": 1542, "source": "bilibili.web-interface.ranking"}
