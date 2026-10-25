@@ -1,3 +1,3 @@
 {"type": "topic.pick", "at": "2026-10-22T20:00:00+08:00", "cohort": "tutorial", "options": [{"title": "题 13", "who": "新手", "wrong_now": "乱问", "can_do_after": "改法", "minutes_to_material": 20, "metric": "completion", "metric_baseline": 0.45, "weak_in_existing": "只讲技巧", "counter_intuitive": ["越详细越差"]}, {"title": "备选 13"}], "chosen": 0}
 {"type": "publish", "at": "2026-10-22T20:30:00+08:00", "bvid": "BV22"}
-{"type": "metrics", "at_hours": 24, "views": 1500, "ctr": 0.05, "avg_view_sec": 44.0, "duration_sec": 200, "likes": 70}
+{"type": "metrics", "at_hours": 24, "views": 1500, "ctr": 0.05, "avg_view_sec": 38.0, "duration_sec": 200, "likes": 70}

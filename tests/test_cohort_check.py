@@ -51,11 +51,19 @@ def test_enough_samples_without_a_drop_reports_no_detectable_regression(tmp_path
     assert mde < 0.4
 
 
-def test_three_consecutive_collapses_are_called_a_regression(tmp_path):
-    root = _batch(tmp_path / "crash", 40, tail=(3, 0.15))
+def test_a_sustained_collapse_is_called_a_regression(tmp_path):
+    """检测器换成标定过的 CUSUM 之后，持续性崩塌仍必须被抓到。"""
+    root = _batch(tmp_path / "crash", 40, tail=(8, 0.15))
     verdict, notes, _ = cc.judge(cc.collect(root, None))
     assert verdict == "退步"
-    assert any("连续 3 条" in n for n in notes)
+    assert any("CUSUM" in n for n in notes)
+
+
+def test_a_three_day_dip_is_not_enough_evidence(tmp_path):
+    """3 天的小坑不该报警 —— 旧规则在这里误报，CUSUM 不该。"""
+    root = _batch(tmp_path / "dip", 40, tail=(3, 0.30))
+    verdict, _, _ = cc.judge(cc.collect(root, None))
+    assert verdict != "退步"
 
 
 def test_min_detectable_shrinks_with_more_samples():

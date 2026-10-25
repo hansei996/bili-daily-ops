@@ -57,5 +57,5 @@ def test_license_exists_and_is_mit():
 
 def test_gitignore_keeps_generated_dirs_out():
     text = (ROOT / ".gitignore").read_text(encoding="utf-8")
-    for entry in ("_live/", "_demo/", "__pycache__/"):
+    for entry in ("_*/", "__pycache__/"):
         assert entry in text
