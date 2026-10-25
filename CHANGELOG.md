@@ -1,5 +1,16 @@
 # 变更记录
 
+## 2026-10-25 · 发布 + 取数现实约束
+
+**仓库已发布**：https://github.com/hansei996/bili-daily-ops（public，main，18 提交）。
+推送时发现生成目录（`_demo` `_live` `_runs` 等）被早期 `git add -A` 收了进去，已 `git rm --cached` 并从 `.gitignore` 兜住。
+
+**实测取数约束**（详见 `docs/OPERATIONS.md`）：单条 `view?bvid=` 可用；空间枚举 `-799`/`-352` 不可用；榜单间歇可用。
+结论：不爬列表，改为用户复制 BVID 列表后按条取数。
+
+**新工具** `tools/register_videos.py`：按 BVID 批量登记（已存在的跳过，可安全重复运行）。
+实测：`BV1GJ411x7h7` 登记成功，记录通过口径校验。
+
 ## 2026-10-25 · F13 收口
 
 新增 `SUMMARY.md`：一页说清现在能做什么、不能做什么、这 12 轮里被自己的测试否掉的东西、
