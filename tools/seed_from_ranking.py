@@ -20,7 +20,14 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
-API = "https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all"
+SOURCES = {
+    "ranking": "https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all",
+    "popular": "https://api.bilibili.com/x/web-interface/popular?ps=20&pn=1",
+}
+API = SOURCES["ranking"]
+
+# 实测：ranking 端点在连续请求后会返回 -352（风控），popular 通常仍可用。
+RATE_LIMITED = -352
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 
 
@@ -79,6 +86,12 @@ def events_for(item, cohort, snapshot_at):
     ]
 
 
+def load_payload(source, transport=None):
+    if transport:
+        return json.loads(Path(transport).read_text(encoding="utf-8"))
+    return fetch(SOURCES.get(source, API))
+
+
 def main(argv):
     top = 20
     cohort = "real-ranking"
@@ -91,9 +104,16 @@ def main(argv):
         if flag == "--out" and index + 1 < len(argv):
             out = Path(argv[index + 1])
 
-    payload = fetch()
+    source = argv[argv.index("--source") + 1] if "--source" in argv else "ranking"
+    transport = argv[argv.index("--transport") + 1] if "--transport" in argv else None
+    payload = load_payload(source, transport)
+    if payload.get("code") == RATE_LIMITED and source == "ranking" and not transport:
+        print("ranking 被风控（code=-352），改用 popular 重试……", file=sys.stderr)
+        source = "popular"
+        payload = load_payload(source)
     if payload.get("code") != 0:
-        print("榜单接口返回 code=%r" % payload.get("code"), file=sys.stderr)
+        print("接口返回 code=%r message=%r（换 --source popular 试试）"
+              % (payload.get("code"), payload.get("message")), file=sys.stderr)
         return 1
     items = ((payload.get("data") or {}).get("list") or [])[:top]
     if not items:

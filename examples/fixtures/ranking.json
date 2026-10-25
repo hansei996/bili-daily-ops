@@ -1,0 +1,77 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "list": [
+      {
+        "bvid": "BV1p8nh61Efm",
+        "title": "《鸣潮》世界观PV | 超验TRANSCENDO",
+        "pubdate": 1792897200,
+        "duration": 822,
+        "stat": {
+          "aid": 117490155787771,
+          "view": 1992732,
+          "danmaku": 9778,
+          "reply": 20732,
+          "favorite": 25857,
+          "coin": 53375,
+          "share": 37208,
+          "now_rank": 0,
+          "his_rank": 17,
+          "like": 98161,
+          "dislike": 0,
+          "vt": 0,
+          "vv": 1992732,
+          "fav_g": 280,
+          "like_g": 317
+        }
+      },
+      {
+        "bvid": "BV1KrHP67E4C",
+        "title": "恭喜Asuka荣获本届歌手争霸赛歌王称号！！【bilibili次元干杯】",
+        "pubdate": 1792834200,
+        "duration": 111,
+        "stat": {
+          "aid": 117494467595669,
+          "view": 736704,
+          "danmaku": 163,
+          "reply": 480,
+          "favorite": 5091,
+          "coin": 2469,
+          "share": 693,
+          "now_rank": 0,
+          "his_rank": 0,
+          "like": 58273,
+          "dislike": 0,
+          "vt": 0,
+          "vv": 736704,
+          "fav_g": 0,
+          "like_g": 1
+        }
+      },
+      {
+        "bvid": "BV17wnY6CE2R",
+        "title": "【独家】牧神记 第106集 道剑十四篇",
+        "pubdate": 1792897202,
+        "duration": 1328,
+        "stat": {
+          "aid": 117491028330016,
+          "view": 1843125,
+          "danmaku": 7493,
+          "reply": 1012,
+          "favorite": 2967,
+          "coin": 22796,
+          "share": 135,
+          "now_rank": 0,
+          "his_rank": 0,
+          "like": 24411,
+          "dislike": 0,
+          "vt": 0,
+          "vv": 1843125,
+          "fav_g": 17,
+          "like_g": 487
+        }
+      }
+    ]
+  }
+}

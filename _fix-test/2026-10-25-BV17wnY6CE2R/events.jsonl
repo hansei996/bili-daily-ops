@@ -1,0 +1,3 @@
+{"type": "topic.pick", "at": "2026-10-25T19:49:14+08:00", "cohort": "fixture", "options": [{"title": "【独家】牧神记 第106集 道剑十四篇"}, {"title": "（基线样本，无备选）"}], "chosen": 0, "why_only_one": "这是别人的视频，用来当同题材基线，不是我们的选题过程"}
+{"type": "publish", "at": "2026-10-25T11:00:02+08:00", "bvid": "BV17wnY6CE2R"}
+{"type": "metrics", "at": "2026-10-25T19:49:14+08:00", "snapshot_at": "2026-10-25T19:49:14+08:00", "at_hours": 72, "hours_since_publish": null, "views": 1843125, "likes": 24411, "coins": 22796, "favorites": 2967, "replies": 1012, "shares": 135, "danmaku": 7493, "duration_sec": 1328, "source": "bilibili.web-interface.ranking"}

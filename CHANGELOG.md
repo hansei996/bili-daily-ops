@@ -1,5 +1,19 @@
 # 变更记录
 
+## 2026-10-25 · F8 风控回退 + 离线可测
+
+**实测发现**：`ranking/v2` 端点在连续请求后返回 `code=-352`（风控）；`popular` 仍可用。
+这不是理论问题——我第一次抓 15 条成功，隔几分钟再抓就是 -352。
+
+处理：
+
+- `seed_from_ranking` 加 `--source ranking|popular`；遇到 -352 自动回退到 popular 并**在 stderr 说明**
+- 加 `--transport <json>`：用录好的 fixture 跑，测试不联网
+- fixture `examples/fixtures/ranking.json` 存了 3 条真实条目（bvid/title/pubdate/duration/stat）
+
+**测试 38 passed**（新增 5 条）：fixture 形状、离线播种产出合规记录、**不许伪造 avg_view_sec**、
+风控时必须报错而不是静默写出空目录、slug 稳定。
+
 ## 2026-10-25 · F7 用真实榜单数据当同题材基线
 
 发现一个洞：我们唯一的**真实数据源**（公开接口）给不出完播率所需的平均播放时长，
