@@ -17,6 +17,8 @@ python tools/status.py
 坏记录会被口径校验抓住         OK
 有基线时能判出崩塌             OK
 没基线时不假装判定             OK
+真实接口数据能建成合规基线       OK
+风控时报警而不是空跑            OK
 
 做不到（写在这里，比写在宣传里有用）
   - 预测哪条会火（只能事后同题材对照，事前就是猜）
@@ -25,7 +27,7 @@ python tools/status.py
   - 拿到精确 T+24h 快照（接口只给累计值，用 snapshot_at 近似并标注）
   - 算出完播率（接口不给平均播放时长，缺就留空）
 
-结果：6 / 6 项能力自检通过
+结果：8 / 8 项能力自检通过
 ```
 
 ## 为什么先做「守门 + 库存」，而不是「选题生成」
@@ -103,8 +105,8 @@ FAIL  cohort:completion   退步（本窗口可判定最小退步 30%）
 ## 开发
 
 ```bash
-python -m pytest tests -q      # 21 passed
-python tools/status.py         # 6/6 能力自检
+python -m pytest tests -q      # 41 passed
+python tools/status.py         # 8/8 能力自检（不联网）
 ```
 
 零第三方依赖，只用标准库。

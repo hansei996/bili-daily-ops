@@ -20,6 +20,13 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 # (标签, 脚本, 参数, 期望退出码, 输出里必须出现的字样)
 # 关键：非零退出常常是**做对了**（拒绝了坏输入），不能一律当成故障。
+# 需要临时目录的两条：跑完即清，不污染仓库
+# (标签, 用哪个 fixture 播种, 期望退出码, 输出里必须出现的字样)
+SEED_CASES = (
+    ("真实接口数据能建成合规基线", "examples/fixtures/ranking.json", 0, "已写入"),
+    ("风控时报警而不是空跑", "examples/fixtures/ranking-limited.json", 1, "code"),
+)
+
 CAN = (
     ("选题准入卡会拒绝烂选题", "tools/topic_gate.py", ["check", "examples/topics.jsonl"], (1,), "打回"),
     ("库存不足时会喊停", "tools/topic_gate.py", ["backlog", "examples/topics.jsonl", "--days", "7"], (1,), "库存不足"),
@@ -61,6 +68,17 @@ def run_case(script, args):
     return proc.returncode, (tail[-1] if tail else ""), blob
 
 
+def run_seed(case, tmp_root):
+    label, fixture, expected, needle = case
+    out = Path(tmp_root) / ("seed-" + str(abs(hash(label))))
+    code, tail, blob = run_case("tools/seed_from_ranking.py",
+                                ["--top", "3", "--cohort", "selftest", "--out", str(out),
+                                 "--transport", fixture])
+    ok = code == expected and needle in blob
+    return {"能力": label, "命令": "tools/seed_from_ranking.py --transport " + fixture,
+            "退出码": code, "期望退出码": [expected], "结果": ok, "最后一行": tail[:80]}
+
+
 def main(argv):
     rows = []
     for label, script, args, codes, needle in CAN:
@@ -68,6 +86,12 @@ def main(argv):
         ok = code in codes and needle in blob
         rows.append({"能力": label, "命令": script + " " + " ".join(args), "退出码": code,
                      "期望退出码": list(codes), "结果": ok, "最后一行": tail[:80]})
+
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="bili-status-") as tmp:
+        for case in SEED_CASES:
+            rows.append(run_seed(case, tmp))
 
     if "--json" in argv:
         print(json.dumps({"can": rows, "cannot": list(CANT)}, ensure_ascii=False, indent=2))
