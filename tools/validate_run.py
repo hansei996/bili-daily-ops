@@ -57,12 +57,16 @@ def load(path):
     return events
 
 
-def check(events):
+def check(events, incomplete=False):
     """返回 [(规则号, 行号, 说明)]，空列表表示全过。"""
     problems = []
+    notes = []
 
     def bad(rule, lineno, message):
-        problems.append((rule, lineno, message))
+        if rule.startswith("N"):
+            notes.append((rule, lineno, message))
+        else:
+            problems.append((rule, lineno, message))
 
     if not events:
         return [("V0", 0, "一份记录都没有：events.jsonl 是空的")]
@@ -110,7 +114,10 @@ def check(events):
 
     for required_once in ("publish", "metrics"):
         if seen.get(required_once, 0) == 0:
-            bad("V9", 0, "缺少 %s 事件：这份记录没法用来复盘" % required_once)
+            rule = "V9" if not incomplete else "N1"
+            bad(rule, 0, "缺少 %s 事件：%s" % (required_once,
+                                    "还没到取数阶段（--allow-incomplete，只提示不算错）"
+                                    if incomplete else "这份记录没法用来复盘"))
     if seen.get("publish", 0) > 1:
         bad("V9", 0, "publish 出现了 %d 次：一条记录只对应一条视频" % seen["publish"])
 
@@ -118,14 +125,15 @@ def check(events):
     if "publish" in order and "metrics" in order and order.index("publish") > order.index("metrics"):
         bad("V10", 0, "metrics 出现在 publish 之前：先发布才有数据")
 
-    return problems
+    return problems + notes if incomplete else problems
 
 
 def main(argv):
     if not argv:
-        print("用法：python tools/validate_run.py <run 目录或 runs 目录> [--all]")
+        print("用法：python tools/validate_run.py <run 目录或 runs 目录> [--allow-incomplete]")
         return 1
     root = Path(argv[0])
+    incomplete = "--allow-incomplete" in argv
     if (root / RUN_FILE).exists():
         targets = [root]
     elif root.is_dir():
@@ -136,7 +144,8 @@ def main(argv):
 
     total_problems = 0
     for run in targets:
-        problems = check(load(run / RUN_FILE))
+        problems = check(load(run / RUN_FILE), incomplete=incomplete)
+        problems = [p for p in problems if not p[0].startswith("N")]
         if problems:
             total_problems += len(problems)
             print("FAIL  %s" % run.name)
