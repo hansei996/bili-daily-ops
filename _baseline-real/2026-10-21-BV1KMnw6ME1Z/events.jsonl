@@ -1,3 +1,0 @@
-{"type": "topic.pick", "at": "2026-10-25T19:48:20+08:00", "cohort": "real-ranking", "options": [{"title": "“借大圣威名，护我痴儿周全”"}, {"title": "（基线样本，无备选）"}], "chosen": 0, "why_only_one": "这是别人的视频，用来当同题材基线，不是我们的选题过程"}
-{"type": "publish", "at": "2026-10-21T09:00:00+08:00", "bvid": "BV1KMnw6ME1Z"}
-{"type": "metrics", "at": "2026-10-25T19:48:20+08:00", "snapshot_at": "2026-10-25T19:48:20+08:00", "at_hours": 72, "hours_since_publish": null, "views": 3043565, "likes": 284288, "coins": 9161, "favorites": 49585, "replies": 2508, "shares": 1509, "danmaku": 196, "duration_sec": 188, "source": "bilibili.web-interface.ranking"}

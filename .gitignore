@@ -1,5 +1,5 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-_demo/
-_live/
+# 生成物与一次性演练目录：不进仓库
+_*/

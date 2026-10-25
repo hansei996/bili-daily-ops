@@ -1,3 +1,0 @@
-{"type": "topic.pick", "at": "2026-10-25T19:49:14+08:00", "cohort": "fixture", "options": [{"title": "恭喜Asuka荣获本届歌手争霸赛歌王称号！！【bilibili次元干杯】"}, {"title": "（基线样本，无备选）"}], "chosen": 0, "why_only_one": "这是别人的视频，用来当同题材基线，不是我们的选题过程"}
-{"type": "publish", "at": "2026-10-24T17:30:00+08:00", "bvid": "BV1KrHP67E4C"}
-{"type": "metrics", "at": "2026-10-25T19:49:14+08:00", "snapshot_at": "2026-10-25T19:49:14+08:00", "at_hours": 72, "hours_since_publish": null, "views": 736704, "likes": 58273, "coins": 2469, "favorites": 5091, "replies": 480, "shares": 693, "danmaku": 163, "duration_sec": 111, "source": "bilibili.web-interface.ranking"}

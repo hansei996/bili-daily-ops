@@ -1,3 +1,0 @@
-{"type": "topic.pick", "at": "2026-10-25T19:48:20+08:00", "cohort": "real-ranking", "options": [{"title": "四人行，必有一怂蛋"}, {"title": "（基线样本，无备选）"}], "chosen": 0, "why_only_one": "这是别人的视频，用来当同题材基线，不是我们的选题过程"}
-{"type": "publish", "at": "2026-10-23T18:05:00+08:00", "bvid": "BV1M1np6YE8c"}
-{"type": "metrics", "at": "2026-10-25T19:48:20+08:00", "snapshot_at": "2026-10-25T19:48:20+08:00", "at_hours": 72, "hours_since_publish": null, "views": 1501670, "likes": 151526, "coins": 87597, "favorites": 38166, "replies": 2165, "shares": 3600, "danmaku": 5518, "duration_sec": 1206, "source": "bilibili.web-interface.ranking"}
