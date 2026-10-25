@@ -52,6 +52,7 @@ def load_runs(root):
     runs = []
     for path in sorted(Path(root).glob("*/events.jsonl")):
         entry = {"run": path.parent.name, "date": None, "title": None, "gate": None, "metrics": None, "cohort": None}
+        first_at = None
         for line in path.read_text(encoding="utf-8-sig").splitlines():
             line = line.strip()
             if not line or line.startswith("#"):
@@ -61,6 +62,8 @@ def load_runs(root):
             except ValueError:
                 continue
             etype = event.get("type")
+            if first_at is None and event.get("at"):
+                first_at = str(event.get("at"))[:10]
             if etype == "topic.pick":
                 chosen = event.get("chosen") or 0
                 options = event.get("options") or []
@@ -72,6 +75,9 @@ def load_runs(root):
                 entry["date"] = str(event.get("at", ""))[:10]
             elif etype == "metrics":
                 entry["metrics"] = event
+        # 还没发布（没有 publish 事件）时，用第一条事件的日期定位 —— 否则这条记录对周表隐形
+        if not entry["date"]:
+            entry["date"] = first_at
         if entry["date"]:
             runs.append(entry)
     return runs
