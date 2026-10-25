@@ -23,6 +23,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import cohort_check as cc  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from bili_harness import verdict as vd  # noqa: E402
 import topic_gate  # noqa: E402
 
 BASE_COLUMNS = ("日期", "准入", "发布", "CTR", "cohort", "判定")
@@ -240,6 +243,29 @@ def main(argv):
     for text, ok, detail in results:
         print("%s  %-24s %s" % ("PASS" if ok else "FAIL", text, detail))
     print()
+    if "--record-verdict" in argv:
+        target = argv[argv.index("--record-verdict") + 1]
+        snap = vd.snapshot(runs, start, end, metric)
+        vd.record(target, snap, {"verdict": "; ".join("%s=%s" % (t, ok) for t, ok, _ in results)})
+        print("判定已记录：" + target + "（快照 " + snap["digest"][:12] + "）")
+
+    if "--replay-verdict" in argv:
+        source = argv[argv.index("--replay-verdict") + 1]
+        try:
+            entry = vd.load(source)
+        except ValueError as exc:
+            print("ERROR " + str(exc), file=sys.stderr)
+            return 2
+        snap = vd.snapshot(runs, start, end, metric)
+        diff = vd.compare(entry, snap)
+        if diff["same_inputs"]:
+            print("回放一致：输入快照未变，结论可与 " + source + " 对照")
+        else:
+            print("输入已变，不能直接比较：")
+            for name in diff["changed_runs"]:
+                print("  变化的记录：" + name)
+            print("  旧窗口 %s → 新窗口 %s" % (diff["old_window"], diff["new_window"]))
+
     failed = [t for t, ok, _ in results if not ok]
     if failed:
         print("结果：%d 条断言失败（周区间 %s..%s）" % (len(failed), start, end))

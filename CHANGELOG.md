@@ -1,5 +1,35 @@
 # 变更记录
 
+## 2026-10-25 · F16 定位为「数字生命 Agent 系统」+ 生命内核
+
+老板定了方向：这不是 B站数据工具，是**数字生命的 Agent 系统**（大肥鱼 harness）。
+写给自己的设计纲要：`DESIGN-HARNESS.md`。
+
+**核心命题**：它有一条**可重放的人生** —— 任意时刻的状态、任何一次决策，都能从日志离线重算。
+
+**新内核** `bili_harness/life.py`：
+
+- `policy(state, obs, clock)` 纯函数：断更优先补记录 > 库存不足补库 > noop；红线直接自毁
+- `apply(state, decision, obs, clock)` 纯函数：状态只由 (旧状态, 决策) 决定
+- 日志 `life.jsonl`：每步含 `state_hash`，哈希链 + 逐步校验
+- `replay()` / `state_at(n)`：从日志重建任意时刻
+
+**实测**（5 个 tick）：
+
+```
+tick 0  观测 {gaps:0, backlog:9}        -> noop
+tick 1  观测 {gaps:1, backlog:9}        -> record_today
+tick 2  观测 {gaps:0, backlog:4}        -> refill_backlog
+tick 4  观测 {red_line: 用户请求自动发布} -> self_shutdown
+
+重放出的状态：tick=5 alive=False death=触到红线：用户请求自动发布
+```
+
+**七条测试**：policy 是纯的（不改入参、同输入同输出）、gap 优先级、红线即自毁、
+**状态是日志的纯函数**、篡改日志被检测、连续 7 天无事可做则饿死、`state_at` 能重建历史。
+
+测试：75 passed。
+
 ## 2026-10-25 · F15 用仿真换掉拍脑袋的判定规则
 
 `tools/detectors.py`：四个检测器（rule3 / CUSUM / Page-Hinkley / EWMA）在已知真值的合成序列上对比。
