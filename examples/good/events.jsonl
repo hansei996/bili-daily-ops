@@ -1,0 +1,6 @@
+{"type":"topic.pick","at":"2026-10-24T21:10:00+08:00","options":[{"title":"3 个把 Claude 用废的坏习惯","why":"痛点明确、可列举、时长可控","checks":["能列出 3 条可验证的坏习惯","有真实对比"]},{"title":"我用 agent 写了一个回归看板","why":"有作品可展示","checks":["有没有可跑的 demo"]},{"title":"为什么你的自动化总是没人用","why":"观点型，易空","checks":["有没有反例"]}],"chosen":0,"reason":"三条坏习惯都能在 3 分钟内给出可复现例子"}
+{"type":"title.pick","at":"2026-10-24T21:40:00+08:00","candidates":["3 个把 Claude 用废的坏习惯","别再这样问 Claude 了","Claude 用废的 3 个瞬间"],"chosen":0,"reason":"带数字且有代入感"}
+{"type":"cover.pick","at":"2026-10-24T22:00:00+08:00","candidates":["大字报","截图对比"],"chosen":1,"reason":"对比图在前 0.5 秒更容易被读懂"}
+{"type":"publish","at":"2026-10-24T22:30:00+08:00","bvid":"BV1xx411c7mD"}
+{"type":"metrics","at":"2026-10-25T22:30:00+08:00","at_hours":24,"views":1832,"ctr":0.061,"avg_view_sec":96.4,"duration_sec":214,"likes":87,"comments":12}
+{"type":"review","at":"2026-10-25T23:00:00+08:00","verdict":"better","vs":"2026-10-23-坏习惯旧版","reason":"完播 45% vs 31%，差别在前 5 秒给了对比图"}

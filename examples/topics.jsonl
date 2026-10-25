@@ -1,0 +1,3 @@
+{"title":"3 个把 Claude 用废的坏习惯","who":"每天用 AI 写代码但总返工的人","wrong_now":"把 AI 当搜索框，一次问一大坨，错了就重问","can_do_after":"立刻能用三条自查把返工率降下来","minutes_to_material":20,"metric":"completion_ratio","metric_baseline":0.38,"weak_in_existing":"同类只讲提示词技巧，不展示返工的现场","counter_intuitive":["问得越详细不一定越好：约束太多模型会忽略一半"]}
+{"title":"我用 agent 写了个回归看板","who":"团队里负责 CI 的人","wrong_now":"测试永远绿，但 agent 行为变了没人知道","can_do_after":"能照着自己搭一个最小看板","minutes_to_material":180,"metric":"completion_ratio","metric_baseline":0.38,"weak_in_existing":"讲工具的都在讲生成，不讲怎么判断退步","counter_intuitive":["看板的价值不是好看，是让退步无所遁形"]}
+{"title":"随便聊聊最近的 AI","who":"","wrong_now":"","can_do_after":"","minutes_to_material":5,"metric":"","metric_baseline":null,"weak_in_existing":"","counter_intuitive":[]}
