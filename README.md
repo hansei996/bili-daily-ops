@@ -17,6 +17,8 @@ python tools/status.py
 坏记录会被口径校验抓住         OK
 有基线时能判出崩塌             OK
 没基线时不假装判定             OK
+完整一周不报断更               OK
+断更 3 天会被判失败            OK
 真实接口数据能建成合规基线       OK
 风控时报警而不是空跑            OK
 
@@ -27,7 +29,7 @@ python tools/status.py
   - 拿到精确 T+24h 快照（接口只给累计值，用 snapshot_at 近似并标注）
   - 算出完播率（接口不给平均播放时长，缺就留空）
 
-结果：8 / 8 项能力自检通过
+结果：10 / 10 项能力自检通过
 ```
 
 ## 为什么先做「守门 + 库存」，而不是「选题生成」
@@ -38,7 +40,9 @@ python tools/status.py
 
 所以第一件事不是「多给你几个点子」，是**判这条能不能进库、库还够不够 7 天**。
 
-## 四个工具，一条链路
+> 每天做什么、每周看哪张表、判「退步」时按什么顺序查：见 [`docs/DAILY-WORKFLOW.md`](./docs/DAILY-WORKFLOW.md)。
+
+## 五个工具，一条链路
 
 | 环节 | 命令 | 它拒绝什么 |
 |---|---|---|
@@ -105,8 +109,8 @@ FAIL  cohort:completion   退步（本窗口可判定最小退步 30%）
 ## 开发
 
 ```bash
-python -m pytest tests -q      # 41 passed
-python tools/status.py         # 8/8 能力自检（不联网）
+python -m pytest tests -q      # 49 passed
+python tools/status.py         # 10/10 能力自检（不联网）
 ```
 
 零第三方依赖，只用标准库。

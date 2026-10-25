@@ -36,6 +36,10 @@ CAN = (
      ["examples/two-weeks", "--week", "2026-10-19..2026-10-25", "--assert", "cohort:completion"], (1,), "退步"),
     ("没基线时不假装判定", "tools/daily_check.py",
      ["examples/week-2026-10-19", "--week", "2026-10-19..2026-10-25", "--assert", "cohort:completion"], (0,), "不可判定"),
+    ("完整一周不报断更", "tools/daily_check.py",
+     ["examples/week-2026-10-19", "--week", "2026-10-19..2026-10-25", "--assert", "gaps:3"], (0,), "最长连续 0 天"),
+    ("断更 3 天会被判失败", "tools/daily_check.py",
+     ["examples/week-gap", "--week", "2026-10-19..2026-10-25", "--assert", "gaps:3"], (1,), "连续 3 天"),
 )
 
 CANT = (

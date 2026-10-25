@@ -16,11 +16,11 @@ def _run():
     )
 
 
-def test_status_reports_eight_capabilities_all_passing():
+def test_status_reports_ten_capabilities_all_passing():
     proc = _run()
     assert proc.returncode == 0, proc.stdout + proc.stderr
     payload = json.loads(proc.stdout)
-    assert len(payload["can"]) == 8
+    assert len(payload["can"]) == 10
     failed = [row["能力"] for row in payload["can"] if not row["结果"]]
     assert failed == [], "这些能力自检没过：" + ", ".join(failed)
 
