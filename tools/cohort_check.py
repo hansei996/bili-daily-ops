@@ -23,6 +23,10 @@ import statistics
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import detectors  # noqa: E402
+
 ALPHA_Z = 1.645   # 单侧 0.05
 POWER_Z = 0.842   # power 0.80
 SIGMA_LOG = 0.5   # 比值型指标的保守估计
@@ -124,16 +128,13 @@ def judge(rows, metric="completion", window=7, target_drop=0.30, baseline=None):
         if n < need:
             lines.append("窗口 %d 条少于判定所需 %d 条 —— 样本不足时不判「无退步」" % (n, need))
             return "不可判定", lines, mde
-        threshold = median * (1 - target_drop / 2)
-        worst = consecutive = 0
-        for value in tail:
-            consecutive = consecutive + 1 if value < threshold else 0
-            worst = max(worst, consecutive)
-        if worst >= 3:
-            lines.append("连续 %d 条低于基线中位数的 %.0f%% 阈值（%.3f）"
-                         % (worst, (1 - target_drop / 2) * 100, threshold))
+        # 判定用 CUSUM 而不是「连续 N 条」：仿真显示后者在 28 天窗口里的误报率高达 61%，
+        # 而标定过的 CUSUM 是 0.5%（见 DECISION-D3）。
+        at = detectors.detect_cusum(values, median)
+        if at is not None:
+            lines.append("CUSUM 在下标 %d 处报警（基线中位数 %.3f，h=%.0f）" % (at, median, 5.0))
             return "退步", lines, mde
-        lines.append("没有连续 3 条低于阈值（当前最长 %d 条）" % worst)
+        lines.append("CUSUM 未报警（h=%.0f，标定误报率约 0.5%%/窗口）" % 5.0)
         return "没有可判定的退步", lines, mde
 
     mde = min_detectable(n)
@@ -146,15 +147,11 @@ def judge(rows, metric="completion", window=7, target_drop=0.30, baseline=None):
         return "不可判定", lines, mde
 
     median = statistics.median(values)
-    threshold = median * (1 - target_drop / 2)
-    worst = consecutive = 0
-    for value in tail:
-        consecutive = consecutive + 1 if value < threshold else 0
-        worst = max(worst, consecutive)
-    if worst >= 3:
-        lines.append("连续 %d 条低于中位数的 %.0f%% 阈值（%.3f）" % (worst, (1 - target_drop / 2) * 100, threshold))
+    at = detectors.detect_cusum(values, median)
+    if at is not None:
+        lines.append("CUSUM 在下标 %d 处报警（基线中位数 %.3f）" % (at, median))
         return "退步", lines, mde
-    lines.append("没有连续 3 条低于阈值（当前最长 %d 条）" % worst)
+    lines.append("CUSUM 未报警")
     return "没有可判定的退步", lines, mde
 
 

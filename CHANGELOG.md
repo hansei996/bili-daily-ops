@@ -1,5 +1,32 @@
 # 变更记录
 
+## 2026-10-25 · F14 bilibili harness（技术内核，不依赖账号数据）
+
+新包 `bili_harness/`：
+
+- `errors.py`：把 `-799`（可重试）/ `-352`（需人工、**不许重试**）/ `-101|-403`（需登录）分开
+- `sign.py`：WBI 签名（混淆表 + 截断 32 位 + md5(sorted_query + mixin_key)）
+- `store.py`：JSONL + sha256 链的录制库，篡改一个字节重放即报错
+- `client.py`：live / record / replay 三模式 + **硬预算**（默认 30 次/分钟）
+- `__main__.py`：`python -m bili_harness record|replay|video`
+
+**实测**（真实接口）：
+
+```
+$ python -m bili_harness record fixtures
+已录 1 次交换到 fixtures
+样例： BV1c5HK6CEPu, BV1p8nh61Efm, BV1DiHK6tESR, BV17wnY6CE2R, BV15cH56sE1j
+
+$ python -m bili_harness replay fixtures
+回放成功：1 条交换，样例 5 条视频
+
+$ python -m bili_harness video BV1GJ411x7h7
+{"bvid": "BV1GJ411x7h7", "title": "【官方 MV】Never Gonna Give You Up - Rick Astley", "views": 107692919}
+```
+
+**12 条离线测试**（`tests/test_harness.py`）：签名确定性、store 往返与篡改检测、
+**replay 模式调用 transport 就失败**、预算耗尽立刻抛错、`-352` 抛 `needs_human` 而不是重试。
+
 ## 2026-10-25 · 发布 + 取数现实约束
 
 **仓库已发布**：https://github.com/hansei996/bili-daily-ops（public，main，18 提交）。
